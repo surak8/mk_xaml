@@ -1,8 +1,0 @@
-<Window xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:local="clr-namespace:NSTmp"
-	x:Name="window1"
-	x:Class="NSTmp.MainWindow"
-	Title="MainWindow"
-	Width="350"
-	Height="525" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
-	<Grid />
-</Window>
