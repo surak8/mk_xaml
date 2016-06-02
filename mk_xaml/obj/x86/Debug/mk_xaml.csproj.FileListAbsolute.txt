@@ -1,0 +1,7 @@
+C:\Users\rik\source\git_work\mk_xaml\obj\x86\Debug\mk_xaml.csprojResolveAssemblyReference.cache
+C:\Users\rik\source\git_work\mk_xaml\mk_xaml.exe.config
+C:\Users\rik\source\git_work\mk_xaml\obj\x86\Debug\mk_xaml.exe
+C:\Users\rik\source\git_work\mk_xaml\mk_xaml.xml
+C:\Users\rik\source\git_work\mk_xaml\obj\x86\Debug\mk_xaml.pdb
+C:\Users\rik\source\git_work\mk_xaml\mk_xaml.exe
+C:\Users\rik\source\git_work\mk_xaml\mk_xaml.pdb
