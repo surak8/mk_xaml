@@ -8,6 +8,8 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+#define GENERATE_WINDOW
+
 using System;
 using System.Diagnostics;
 using System.Reflection;
@@ -17,42 +19,68 @@ namespace NSMk_xaml {
 
     public class mk_xamlDriver {
         #region constants
-        const string CLASS_NAME = "MainWindow";
         const string NAMESPACE = "NSTmp";
+        const string MAINWINDOW_CLASS_NAME = "MainWindow";
+        const string APP_ELEMENT_NAME = "Application";
+        const string APP_FILE_NAME = "App";
         #endregion
 
+#if GENERATE_WINDOW
         static void windowHandler(object sender, out string elementName, out string fileName, out string nameSpace) {
-			elementName = "Window";
-			fileName = CLASS_NAME;
-			nameSpace = NAMESPACE;
-		}
+            elementName = "Window";
+            fileName = MAINWINDOW_CLASS_NAME;
+            nameSpace = NAMESPACE;
+        }
 
-		static void windowElement(object sender, XmlWriter xw) {
-			xw.WriteAttributeString("Name", XamlFileGenerator.NS_X, "window1");
-			xw.WriteAttributeString("Class", XamlFileGenerator.NS_X, NAMESPACE + "." + CLASS_NAME);
-			xw.WriteAttributeString("Title", "MainWindow");
-			xw.WriteAttributeString("Width", "350");
-			xw.WriteAttributeString("Height", "525");
-		}
+        static void windowElement(object sender, XmlWriter xw) {
+            xw.WriteAttributeString("Name", XamlFileGenerator.NS_X, "window1");
+            xw.WriteAttributeString("Class", XamlFileGenerator.NS_X, NAMESPACE + "." + MAINWINDOW_CLASS_NAME);
+            xw.WriteAttributeString("Title", "MainWindow");
+            xw.WriteAttributeString("Width", "350");
+            xw.WriteAttributeString("Height", "525");
+        }
 
-		static void windowContent(object sender, XmlWriter xw) {
-			xw.WriteStartElement("Grid");
-			xw.WriteEndElement();
-		}
+        static void windowContent(object sender, XmlWriter xw) {
+            xw.WriteStartElement("Grid");
+            xw.WriteEndElement();
+        }
+#else
+                static void appHandler(object sender, out string elementName, out string fileName, out string nameSpace) {
+            elementName = APP_ELEMENT_NAME;
+            fileName = APP_FILE_NAME;
+            nameSpace = NAMESPACE;
+        }
+        static void appElement(object sender, XmlWriter xw) {
+            xw.WriteAttributeString("Class", XamlFileGenerator.NS_X, NAMESPACE + "." + APP_ELEMENT_NAME);
+            xw.WriteAttributeString("StartupUri", MAINWINDOW_CLASS_NAME + ".xaml");
+        }
+        static void appContent(object sender, XmlWriter xw) {
+            xw.WriteStartElement(APP_ELEMENT_NAME + ".Resources");
+            xw.WriteFullEndElement();
+        }
+#endif
 
-		static void log(MethodBase mb) {
-			Debug.Print(mb.ReflectedType.Name + "." + mb.Name);
-		}
+        static void log(MethodBase mb) {
+            Debug.Print(mb.ReflectedType.Name + "." + mb.Name);
+        }
 
-		[STAThread()]
-		public static void Main(string[] args) {
-			string xamlName, csName, modelName;
+        [STAThread()]
+        public static void Main(string[] args) {
+            string xamlName, csName = null, modelName = null;
 
-			XamlFileGenerator.generateFile(
-				new XamlGenerationHandler(windowHandler),
-				new XamlElementAttributeHandler(windowElement),
-				new XamlContentHandler(windowContent),
-				out xamlName, out csName, out modelName);
-		}
-	}
+#if GENERATE_WINDOW
+            XamlFileGenerator.generateFile(
+                new XamlGenerationHandler(windowHandler),
+                new XamlElementAttributeHandler(windowElement),
+                new XamlContentHandler(windowContent),
+                out xamlName, out csName, out modelName);
+#else
+            XamlFileGenerator.generateFile(
+                new XamlGenerationHandler(appHandler),
+                new XamlElementAttributeHandler(appElement),
+                new XamlContentHandler(appContent),
+                out xamlName);
+#endif
+        }
+    }
 }

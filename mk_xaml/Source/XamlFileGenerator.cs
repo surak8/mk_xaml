@@ -9,12 +9,12 @@ using Microsoft.CSharp;
 
 namespace NSMk_xaml {
     #region delegates
-    delegate void XamlGenerationHandler(object sender, out string elementName, out string fileName, out string nameSpace);
-    delegate void XamlElementAttributeHandler(object sender, XmlWriter xw);
-    delegate void XamlContentHandler(object sender, XmlWriter xw);
+    public delegate void XamlGenerationHandler(object sender, out string elementName, out string fileName, out string nameSpace);
+    public delegate void XamlElementAttributeHandler(object sender, XmlWriter xw);
+    public delegate void XamlContentHandler(object sender, XmlWriter xw);
     #endregion
 
-    static class XamlFileGenerator {
+    public static class XamlFileGenerator {
         #region constants
         public const string NS_X = "http://schemas.microsoft.com/winfx/2006/xaml";
         public const string NS_DEFAULT = "http://schemas.microsoft.com/winfx/2006/xaml/presentation";
@@ -25,9 +25,8 @@ namespace NSMk_xaml {
         static XmlWriterSettings _xws;
         static readonly CodeExpression ceThis = new CodeThisReferenceExpression();
         static readonly CodeExpression ceNull = new CodeSnippetExpression();
-        #endregion
-
         static readonly CodeStatement csBlank = new CodeSnippetStatement();
+        #endregion
 
         #region properties
         static XmlWriterSettings settings {
@@ -38,13 +37,24 @@ namespace NSMk_xaml {
                     _xws.IndentChars = "\t";
                     _xws.OmitXmlDeclaration = true;
                     _xws.NewLineOnAttributes = true;
+                    _xws.NewLineHandling = NewLineHandling.None;
                 }
                 return _xws;
             }
         }
         #endregion
 
-        internal static void generateFile(XamlGenerationHandler xgh, XamlElementAttributeHandler xeah, XamlContentHandler xch, out string outXamlName, out string outCSName, out string outModelName) {
+        public static void generateFile(XamlGenerationHandler xgh, XamlElementAttributeHandler xeah, XamlContentHandler xch, out string outXamlName) {
+            string s1, s2;
+
+            generateFile(xgh, xeah, xch, out outXamlName, out s1, out s2, false);
+        }
+
+        public static void generateFile(XamlGenerationHandler xgh, XamlElementAttributeHandler xeah, XamlContentHandler xch, out string outXamlName, out string outCSName, out string outModelName) {
+            generateFile(xgh, xeah, xch, out outXamlName, out outCSName, out outModelName, true);
+        }
+
+        static void generateFile(XamlGenerationHandler xgh, XamlElementAttributeHandler xeah, XamlContentHandler xch, out string outXamlName, out string outCSName, out string outModelName, bool generateViewModel) {
             StringBuilder sb;
             string fname, ename, ns, modelName;
             CodeDomProvider cdp = new CSharpCodeProvider();
@@ -58,9 +68,6 @@ namespace NSMk_xaml {
                 if (string.IsNullOrEmpty(fname))
                     throw new ArgumentNullException("fname", "file-name is null!");
                 outXamlName = fname + ".xaml";
-                outCSName = fname + ".xaml." + cdp.FileExtension;
-                modelName = fname + "ViewModel";
-                outModelName = modelName + "." + cdp.FileExtension;
                 sb = new StringBuilder();
                 using (StringWriter sw = new StringWriter(sb)) {
                     using (XmlWriter xw = XmlWriter.Create(sw, settings)) {
@@ -77,7 +84,6 @@ namespace NSMk_xaml {
 						 * */
                         xw.WriteStartElement(ename, NS_DEFAULT);
                         xw.WriteAttributeString("xmlns", "x", null, NS_X);
-                        //						xw.WriteAttributeString("Name", NS_X, "zzz");
                         xw.WriteAttributeString("xmlns", "d", null, NS_BLEND);
                         if (!string.IsNullOrEmpty(ns))
                             xw.WriteAttributeString("xmlns", "local", null, "clr-namespace:" + ns);
@@ -97,21 +103,31 @@ namespace NSMk_xaml {
                 opts.BlankLinesBetweenMembers = false;
                 opts.ElseOnClosing = true;
 
-                createMainFile(outCSName, ns, fname, ename, cdp, modelName, opts);
-                createModelfile(outModelName, ns, modelName, cdp, opts);
+                outCSName = fname + ".xaml." + cdp.FileExtension;
+                modelName = fname + "ViewModel";
+                outModelName = modelName + "." + cdp.FileExtension;
+                createMainFile(outCSName, ns, fname, ename, cdp, modelName, opts, generateViewModel);
+                if (generateViewModel) {
+                    createModelfile(outModelName, ns, modelName, cdp, opts);
+                }
             }
         }
 
         static void createModelfile(string outModelName, string nameSpace, string modelName, CodeDomProvider cdp, CodeGeneratorOptions opts) {
             CodeCompileUnit ccu = null;
-            CodeNamespace ns = new CodeNamespace(nameSpace);
+            CodeNamespace ns0, ns;
             CodeTypeDeclaration ctd;
             CodeConstructor cc;
             CodeMemberEvent cme;
             CodeMemberMethod cmm, cmm2;
             CodeEventReferenceExpression cere;
 
-            ns.Imports.Add(new CodeNamespaceImport("System.ComponentModel"));
+            ccu = new CodeCompileUnit();
+            ccu.Namespaces.Add(ns = ns0 = new CodeNamespace());
+            if (!string.IsNullOrEmpty(nameSpace))
+                ccu.Namespaces.Add(ns = new CodeNamespace(nameSpace));
+
+            ns0.Imports.Add(new CodeNamespaceImport("System.ComponentModel"));
             ns.Types.Add(ctd = new CodeTypeDeclaration(modelName));
             if (cdp.Supports(GeneratorSupport.PartialTypes))
                 ctd.IsPartial = true;
@@ -165,32 +181,37 @@ namespace NSMk_xaml {
             outputFile(ccu, ns, cdp, outModelName, opts);
         }
 
-        static void createMainFile(string outCSName, string nameSpace, string fname, string ename, CodeDomProvider cdp, string modelName, CodeGeneratorOptions opts) {
+        static void createMainFile(string outCSName, string nameSpace, string fname, string ename, CodeDomProvider cdp, string modelName, CodeGeneratorOptions opts, bool generateViewModel) {
             CodeCompileUnit ccu = null;
-            CodeNamespace ns = new CodeNamespace(nameSpace);
+            CodeNamespace ns0, ns;
             CodeTypeDeclaration ctd;
             CodeConstructor cc;
             CodeMemberField f;
+            CodeFieldReferenceExpression fr = null;
 
+            ccu = new CodeCompileUnit();
+            ccu.Namespaces.Add(ns = ns0 = new CodeNamespace());
+            if (!string.IsNullOrEmpty(nameSpace))
+                ccu.Namespaces.Add(ns = new CodeNamespace(nameSpace));
+
+            ns0.Imports.Add(new CodeNamespaceImport("System.Windows"));
             ns.Types.Add(ctd = new CodeTypeDeclaration(fname));
             if (cdp.Supports(GeneratorSupport.PartialTypes))
                 ctd.IsPartial = true;
             ctd.BaseTypes.Add(ename);
 
-            CodeFieldReferenceExpression fr = new CodeFieldReferenceExpression(ceThis, "_vm");
-            ctd.Members.AddRange(
-                new CodeTypeMember[] {
-                    f=new CodeMemberField(modelName,fr.FieldName),
-                    cc=new CodeConstructor(),
-                });
-            f.Attributes = 0;
-            cc.Attributes = MemberAttributes.Public;
-            cc.Statements.AddRange(
-                new CodeStatement[] {
-                    new CodeAssignStatement(fr, new CodeObjectCreateExpression(modelName)),
+            if (generateViewModel) {
+                fr = new CodeFieldReferenceExpression(ceThis, "_vm");
+                ctd.Members.Add(f = new CodeMemberField(modelName, fr.FieldName));
+                f.Attributes = 0;
+                ctd.Members.Add(cc = new CodeConstructor());
+                cc.Attributes = MemberAttributes.Public;
+                cc.Statements.Add(new CodeAssignStatement(fr, new CodeObjectCreateExpression(modelName)));
+                cc.Statements.Add(
                     new CodeExpressionStatement(
-                        new CodeMethodInvokeExpression (ceThis,"InitializeComponent",new CodeExpression[0]))
-                });
+                        new CodeMethodInvokeExpression(ceThis, "InitializeComponent", new CodeExpression[0])));
+            }
+
             outputFile(ccu, ns, cdp, outCSName, opts);
         }
 
