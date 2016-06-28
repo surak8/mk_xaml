@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>NSMk_xaml</RootNamespace>
     <AssemblyName>mk_xaml</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -26,6 +26,7 @@
     <DocumentationFile>mk_xaml.xml</DocumentationFile>
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <NoWarn>1591</NoWarn>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -38,24 +39,38 @@
     <DocumentationFile>mk_xaml.xml</DocumentationFile>
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <NoWarn>1591</NoWarn>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject />
+    <StartupObject>NSMk_xaml.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup Label="None">
-    <None Include="app.config" />
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup Label="AssemblyInfo">
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Source\BaseXamlFileGeneration.cs" />
+    <Compile Include="Source\GenFileType.cs" />
+    <Compile Include="Source\interfaces\ICodeDomGenerationUtil.cs" />
+    <Compile Include="Source\interfaces\IXamlFileGenerationData.cs" />
+    <Compile Include="Source\Logger.cs" />
+    <Compile Include="Source\MKXOptions.cs" />
+    <Compile Include="Source\MyPage.cs" />
+    <Compile Include="Source\Tester.cs" />
     <Compile Include="Source\XamlFileGenerator.cs" />
   </ItemGroup>
   <ItemGroup Label="IDK">
     <Compile Include="Source\adriver.cs" />
   </ItemGroup>
-  <ItemGroup Label="References">
+  <ItemGroup>
+    <Reference Include="CppCodeProvider, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.JScript" />
+    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="Microsoft.VisualC" />
     <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xaml" />
     <Reference Include="System.XML" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
