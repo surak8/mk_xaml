@@ -65,7 +65,7 @@ namespace NSMk_xaml {
             if (string.IsNullOrEmpty(fname = ixfgd.fileName))
                 if (string.IsNullOrEmpty(fname))
                     throw new ArgumentNullException("fname", "file-name is null!");
-            if (ixfgd.generationType == GenFileType.View)
+            if (ixfgd.generationType == GenFileType.View||ixfgd.generationType== GenFileType.NavigationWindow)
                 ixfgd.xamlName = Path.Combine("Source\\Views\\", fname + ".xaml");
             else
                 ixfgd.xamlName = fname + ".xaml";
@@ -88,7 +88,7 @@ namespace NSMk_xaml {
             logFileGeneratedFile(ixfgd.xamlName, sb);
             ext = opts.provider.FileExtension;
             modelName = fname + "ViewModel";
-            if (ixfgd.generationType == GenFileType.View) {
+            if (ixfgd.generationType == GenFileType.View||ixfgd.generationType==  GenFileType.NavigationWindow) {
                 ixfgd.codeBehindName = Path.Combine("Source\\Views", fname + ".xaml." + ext);
                 ixfgd.viewModelName = Path.Combine("Source\\Models\\", modelName + "." + ext);
             } else {
