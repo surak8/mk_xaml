@@ -31,7 +31,6 @@ namespace NSMk_xaml {
                     case GenFileType.Application: return "Application";
                     case GenFileType.View: return "Page";
                     case GenFileType.NavigationWindow: return "NavigationWindow";
-                    //                    case GenFileType.Model: return "ModelElementName";
                     default: return "DefaultElementName";
                 }
             }
@@ -44,7 +43,6 @@ namespace NSMk_xaml {
                     case GenFileType.Application: return "App";
                     case GenFileType.View: return "ViewFileName";
                     case GenFileType.NavigationWindow: return "MainWindow";
-                    //                    case GenFileType.Model: return "ModelFileName";
                     default: return "DefaultFileName";
                 }
             }
@@ -66,6 +64,7 @@ namespace NSMk_xaml {
             } else if (localGenerationType == GenFileType.View) {
                 ns.Imports.Add(new CodeNamespaceImport("System.Windows.Controls"));
             } else if (localGenerationType == GenFileType.NavigationWindow) {
+                ns.Imports.Add(new CodeNamespaceImport("System.Windows"));
                 ns.Imports.Add(new CodeNamespaceImport("System.Windows.Navigation"));
             } else
                 Logger.log(MethodBase.GetCurrentMethod(), "Type=" + this.localGenerationType);
@@ -92,7 +91,9 @@ namespace NSMk_xaml {
             if (localGenerationType == GenFileType.View) {
                 ns.Imports.Add(new CodeNamespaceImport("System.Reflection"));
                 ns.Imports.Add(new CodeNamespaceImport("System.ComponentModel"));
-            } else if (localGenerationType==  GenFileType.NavigationWindow) {
+            } else if (localGenerationType == GenFileType.NavigationWindow) {
+                ns.Imports.Add(new CodeNamespaceImport("System.Reflection"));
+                ns.Imports.Add(new CodeNamespaceImport("System.ComponentModel"));
                 ctd.Members.Add(new CodeSnippetTypeMember("#warning in " + Logger.makeSig(MethodBase.GetCurrentMethod()) + " here."));
             } else
                 Logger.log(MethodBase.GetCurrentMethod(), "Type=" + this.localGenerationType);
@@ -121,10 +122,7 @@ namespace NSMk_xaml {
                 xw.WriteAttributeString("Width", "300");
                 xw.WriteAttributeString("Heighth", "300");
             } else if (localGenerationType == GenFileType.NavigationWindow) {
-                xw.WriteAttributeString("riktest", "true");
-                // add x:Name
                 xw.WriteAttributeString("Name", XamlFileGenerator.NS_X, blah(this.localFileName, 1));
-                // add x:Class
                 xw.WriteAttributeString("Class", XamlFileGenerator.NS_X,
                     (string.IsNullOrEmpty(this.localNamespace) ?
                         this.localFileName :
@@ -143,11 +141,8 @@ namespace NSMk_xaml {
                 xw.WriteStartElement("Page.Resources", XamlFileGenerator.NS_DEFAULT);
                 xw.WriteFullEndElement();
             } else if (this.localGenerationType == GenFileType.NavigationWindow) {
-                xw.WriteStartElement("navwindow");
-                xw.WriteComment("fix this");
-                xw.WriteFullEndElement();
+                xw.WriteComment(" " + Logger.makeSig(MethodBase.GetCurrentMethod()) + " ");
             } else {
-                //                Logger.log(MethodBase.GetCurrentMethod());
                 Logger.log(MethodBase.GetCurrentMethod(), "Type=" + this.localGenerationType);
             }
         }
@@ -157,8 +152,6 @@ namespace NSMk_xaml {
         static string blah(string file, int v) {
             return file.Substring(0, 1).ToLower() +
                 file.Substring(1) + v;
-            //            throw new NotImplementedException();
         }
-
     }
 }

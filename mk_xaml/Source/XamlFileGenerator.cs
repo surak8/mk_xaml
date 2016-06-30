@@ -65,7 +65,7 @@ namespace NSMk_xaml {
             if (string.IsNullOrEmpty(fname = ixfgd.fileName))
                 if (string.IsNullOrEmpty(fname))
                     throw new ArgumentNullException("fname", "file-name is null!");
-            if (ixfgd.generationType == GenFileType.View||ixfgd.generationType== GenFileType.NavigationWindow)
+            if (ixfgd.generationType == GenFileType.View || ixfgd.generationType == GenFileType.NavigationWindow)
                 ixfgd.xamlName = Path.Combine("Source\\Views\\", fname + ".xaml");
             else
                 ixfgd.xamlName = fname + ".xaml";
@@ -88,7 +88,7 @@ namespace NSMk_xaml {
             logFileGeneratedFile(ixfgd.xamlName, sb);
             ext = opts.provider.FileExtension;
             modelName = fname + "ViewModel";
-            if (ixfgd.generationType == GenFileType.View||ixfgd.generationType==  GenFileType.NavigationWindow) {
+            if (ixfgd.generationType == GenFileType.View || ixfgd.generationType == GenFileType.NavigationWindow) {
                 ixfgd.codeBehindName = Path.Combine("Source\\Views", fname + ".xaml." + ext);
                 ixfgd.viewModelName = Path.Combine("Source\\Models\\", modelName + "." + ext);
             } else {
@@ -97,11 +97,11 @@ namespace NSMk_xaml {
             }
             createMainFile(ixfgd.codeBehindName, ns, fname, ename, modelName, ixfgd.generateViewModel, ixfgd, opts);
             if (ixfgd.generateViewModel)
-                createModelfile(ixfgd.viewModelName, ns, modelName, ixfgd, opts);
+                createModelfile(ixfgd.viewModelName, ns, modelName, fname, ixfgd, opts);
         }
 
         static void generationInfo(XmlWriter xw) {
-            xw.WriteComment(" "+infoString() + " ");
+            xw.WriteComment(" " + infoString() + " ");
         }
 
         static string infoString() {
@@ -120,7 +120,7 @@ namespace NSMk_xaml {
                 Directory.CreateDirectory(tmp);
         }
 
-        static void createModelfile(string outModelName, string nameSpace, string modelName, IXamlFileGenerationData ixfgd, ICodeDomGenerationUtil opts) {
+        static void createModelfile(string outModelName, string nameSpace, string modelName, string viewName, IXamlFileGenerationData ixfgd, ICodeDomGenerationUtil opts) {
             CodeCompileUnit ccu = null;
             CodeNamespace ns0, ns;
             CodeTypeDeclaration ctd;
@@ -143,6 +143,10 @@ namespace NSMk_xaml {
                 ns = new CodeNamespace(nameSpace);
             ns.Comments.Add(new CodeCommentStatement(infoString()));
             ns.Types.Add(ctd = new CodeTypeDeclaration(modelName));
+            ctd.Comments.AddRange(new CodeCommentStatement[] {
+                new CodeCommentStatement ("<summary>A view-model for view '"+viewName+"'.</summary>",true),
+                new CodeCommentStatement ("<seealso cref=\""+viewName+"\"/>",true),
+            });
 
             if (opts.provider.Supports(GeneratorSupport.PartialTypes))
                 ctd.IsPartial = true;
@@ -191,7 +195,6 @@ namespace NSMk_xaml {
             CodeFieldReferenceExpression fr = null;
             bool useCCU = true;
 
-
             if (opts is MKXOptions)
                 useCCU = ((MKXOptions)opts).useCompileUnit;
 
@@ -202,28 +205,44 @@ namespace NSMk_xaml {
                     ccu.Namespaces.Add(ns = new CodeNamespace(nameSpace));
             } else {
                 ns0 = ns = new CodeNamespace(string.IsNullOrEmpty(nameSpace) ? string.Empty : nameSpace);
-                //                ns.Imports .Add()
             }
             ns.Comments.Add(new CodeCommentStatement(infoString()));
             ixfgd.addImports(ns0);
             ns.Types.Add(ctd = new CodeTypeDeclaration(fname));
+
+            ctd.Comments.AddRange(new CodeCommentStatement[] {
+                new CodeCommentStatement("<summary>describe type '"+fname+"' here.</summary>",true)
+            });
             if (opts.provider.Supports(GeneratorSupport.PartialTypes))
                 ctd.IsPartial = true;
             ctd.BaseTypes.Add(ename);
+            ctd.Comments.Add(new CodeCommentStatement("<seealso cref=\"" + ename + "\"/>", true));
 
             if (generateViewModel) {
+                const string METHOD_NAME = "InitializeComponent";
+                const string CTX_NAME = "DataContext";
                 fr = new CodeFieldReferenceExpression(null, "_vm");
                 ctd.Members.Add(f = new CodeMemberField(modelName, fr.FieldName));
+                f.Comments.AddRange(new CodeCommentStatement[] {
+                    new CodeCommentStatement ("<summary>the view-model.</summary>",true)
+                });
                 f.Attributes = 0;
                 ctd.Members.Add(cc = new CodeConstructor());
+                cc.Comments.AddRange(new CodeCommentStatement[] {
+                    new CodeCommentStatement ("<summary>ctor.</summary>",true),
+                    new CodeCommentStatement ("<seealso cref=\""+fr.FieldName+"\"/>",true),
+                    new CodeCommentStatement ("<seealso cref=\""+METHOD_NAME+"\"/>",true),
+                    new CodeCommentStatement ("<seealso cref=\""+"FrameworkElement"+"."+CTX_NAME+"\"/>",true),
+                    new CodeCommentStatement ("<seealso cref=\""+modelName+"()\"/>",true)
+                });
                 cc.Attributes = MemberAttributes.Public;
                 cc.Statements.Add(
                     new CodeAssignStatement(
-                        new CodePropertyReferenceExpression(ceThis, "DataContext"),
+                        new CodePropertyReferenceExpression(ceThis, CTX_NAME),
                         new CodeBinaryOperatorExpression(fr, CodeBinaryOperatorType.Assign, new CodeObjectCreateExpression(modelName))));
                 cc.Statements.Add(
                     new CodeExpressionStatement(
-                        new CodeMethodInvokeExpression(null, "InitializeComponent", new CodeExpression[0])));
+                        new CodeMethodInvokeExpression(null, METHOD_NAME, new CodeExpression[0])));
             }
             ixfgd.generateCode(ns, ctd, cc);
             outputFile(ccu, ns, outCSName, opts);
@@ -336,8 +355,6 @@ namespace NSMk_xaml {
         static CodeExpression makeSubstr(CodeExpression ceTarget, CodeExpression ceStart, CodeExpression ceLen) {
             return new CodeMethodInvokeExpression(ceTarget, "Substring", ceStart, ceLen);
         }
-
-#endregion
-
+        #endregion
     }
 }

@@ -13,13 +13,13 @@ namespace NSMk_xaml {
             int exitCode = 0;
             MKXOptions opts = new MKXOptions();
 
-            opts.useCompileUnit = true;
-            opts.createProvider();
+            //            opts.useCompileUnit = true;
             //            XamlFileGenerator.showFileContent = true;
+            opts.createProvider();
             try {
                 // XamlFileGenerator.generateFile(MyNewObj.shared.createType(GenFileType.Application), opts);
                 // XamlFileGenerator.generateFile(MyNewObj.shared.createType(GenFileType.Model), opts);
-                XamlFileGenerator.generateFile(MyNewObj.shared.createType(GenFileType.NavigationWindow), opts);
+                XamlFileGenerator.generateFile(new Tester(GenFileType.NavigationWindow, "NSTester"), opts);
                 // XamlFileGenerator.generateFile(MyNewObj.shared.createType(GenFileType.View), opts);
             } catch (Exception ex) {
                 Console.Error.WriteLine(ex.Message + Environment.NewLine + ex.StackTrace);
@@ -27,21 +27,5 @@ namespace NSMk_xaml {
             }
             Environment.Exit(exitCode);
         }
-    }
-
-    class MyNewObj {
-        internal static readonly MyNewObj shared = new MyNewObj();
-
-        public MyNewObj(string clsName) {
-            className = clsName;
-        }
-
-        MyNewObj() { }
-
-        internal IXamlFileGenerationData createType(GenFileType gft) {
-            return new Tester(gft);
-        }
-
-        public string className { get; private set; }
     }
 }
