@@ -36,7 +36,7 @@ namespace NSMk_xaml {
             }
         }
 
-        protected override string localFileName {
+        public override string localFileName {
             get {
                 switch (localGenerationType) {
                     case GenFileType.NONE: return "NoneFileName";
@@ -53,7 +53,7 @@ namespace NSMk_xaml {
 
         #region virtual implementation
 
-        protected override string localNamespace { get { return _namespace; } }
+        public override string localNamespace { get { return _namespace; } }
 
         protected override void addLocalImports(CodeNamespace ns) {
             base.addLocalImports(ns);
@@ -108,17 +108,24 @@ namespace NSMk_xaml {
                 return base.shouldGenerateViewmodel;
             }
         }
+        protected static string className(BaseXamlFileGeneration bxfg) {
+            return (string.IsNullOrEmpty(bxfg.localNamespace) ?
+                bxfg.localFileName :
+                (bxfg.localNamespace + "." + bxfg.localFileName));
+        }
 
         protected override void writeElementAttributes(XmlWriter xw) {
             base.writeElementAttributes(xw);
-            if (localGenerationType == GenFileType.Application)
-                xw.WriteAttributeString("generationType", "app");
-            else if (localGenerationType == GenFileType.View) {
+            if (localGenerationType == GenFileType.Application) {
+                // write x:Class
+                xw.WriteAttributeString("Class", XamlFileGenerator.NS_X, className(this));
+
+                // write StartupUri
+
+                xw.WriteAttributeString("StartupUri", "test");
+            } else if (localGenerationType == GenFileType.View) {
                 xw.WriteAttributeString("Name", XamlFileGenerator.NS_X, blah(localFileName, 1));
-                xw.WriteAttributeString("Class", XamlFileGenerator.NS_X,
-                    (string.IsNullOrEmpty(this.localNamespace) ?
-                        this.localFileName :
-                        (this.localNamespace + "." + this.localFileName)));
+                xw.WriteAttributeString("Class", XamlFileGenerator.NS_X, className(this));
                 xw.WriteAttributeString("Width", "300");
                 xw.WriteAttributeString("Heighth", "300");
             } else if (localGenerationType == GenFileType.NavigationWindow) {

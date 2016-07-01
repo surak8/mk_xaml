@@ -4,6 +4,7 @@ using System.Xml;
 namespace NSMk_xaml {
     /// <summary>Interface describing XAML-file generation.</summary>
     internal interface IXamlFileGenerationData {
+        #region properties
         /// <summary>The element-name of this class</summary>
         string elementName { get; }
         /// <summary>The base of the projectFileName for this class.</summary>
@@ -11,23 +12,24 @@ namespace NSMk_xaml {
         /// <summary>The namespace for this class.</summary>
         string nameSpace { get; }
 
-		/// <summary>Type of file being generated.</summary>
-		GenFileType generationType { get; }
+        /// <summary>Type of file being generated.</summary>
+        GenFileType generationType { get; }
 
-		/// <summary>MyPage</summary>
-		bool generateViewModel { get; }
+        /// <summary>MyPage</summary>
+        bool generateViewModel { get; }
 
-		/// <summary>read-write name of the XAML-file.</summary>
-		string xamlName { get; set; }
+        /// <summary>read-write name of the XAML-file.</summary>
+        string xamlName { get; set; }
         /// <summary>read-write name of the code-behind file.</summary>
         string codeBehindName { get; set; }
         /// <summary>read-write name of the view-model file.</summary>
         string viewModelName { get; set; }
+        #endregion
 
-
-		/// <summary>any imports required to support this class.</summary>
-		/// <param name="ns"></param>
-		void addImports(CodeNamespace ns);
+        #region methods
+        /// <summary>any imports required to support this class.</summary>
+        /// <param name="ns"></param>
+        void addImports(CodeNamespace ns);
 
         /// <summary>Add object-specific attributes to this XAML object.</summary>
         /// <param name="xw"></param>
@@ -47,6 +49,6 @@ namespace NSMk_xaml {
         /// <param name="ns"></param>
         /// <param name="ctd"></param>
         void generateModelCode(CodeNamespace ns, CodeTypeDeclaration ctd);
-
+        #endregion
     }
 }

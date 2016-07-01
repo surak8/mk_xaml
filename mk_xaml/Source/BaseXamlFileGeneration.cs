@@ -4,19 +4,21 @@ using System.Xml;
 namespace NSMk_xaml {
     abstract class BaseXamlFileGeneration : IXamlFileGenerationData {
 
+        #region protected properties
         protected string localXamlName { get; set; }
         protected string localCodeBehind { get; set; }
         protected string localViewModelName { get; set; }
+        #endregion
 
         #region abstract properties
         protected abstract string localElementName { get; }
-        protected abstract string localFileName { get; }
+        public abstract string localFileName { get; }
         protected abstract GenFileType localGenerationType { get; }
         #endregion
 
         #region virtual properties
         protected virtual bool shouldGenerateViewmodel { get { return false; } }
-        protected virtual string localNamespace { get { return string.Empty; } }
+        public virtual string localNamespace { get { return string.Empty; } }
         #endregion virtual properties
 
         #region virtual methods

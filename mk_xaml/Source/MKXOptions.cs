@@ -5,60 +5,62 @@ using Microsoft.VisualC;
 using Microsoft.JScript;
 
 namespace NSMk_xaml {
-	public class MKXOptions : ICodeDomGenerationUtil {
+    public class MKXOptions : ICodeDomGenerationUtil {
 
-		enum LanguangeType {
-			VB,
-			CPP,
+        public enum LangaugeType {
+            VB,
+            CPP,
+            JavaScript,
+            CSharp
+        }
 
-			JavaScript,
-			CSharp
-		}
+        #region ctor
+        public MKXOptions() : this("c#") { }
+        public MKXOptions(string whichType) {
+            setLanguageByName(whichType);
+            useCompileUnit = false;
+        }
+        #endregion
 
-		#region ctor
-		public MKXOptions() : this("c#") { }
-		public MKXOptions(string whichType) {
-			setLanguageByName(whichType);
-			useCompileUnit = false;
-		}
-		#endregion
+        #region methods
+        internal void setLanguageByName(string aName) {
+            switch (aName.ToLower()) {
+                case "vb": this.generationType = LangaugeType.VB; break;
+                case "cpp": case "c++": this.generationType = LangaugeType.CPP; break;
+                case "js": this.generationType = LangaugeType.JavaScript; break;
+                case "c#": case "csharp": this.generationType = LangaugeType.CSharp; break;
+            }
+        }
 
-		internal void setLanguageByName(string aName) {
-			switch (aName.ToLower()) {
-				case "vb": provider = new VBCodeProvider(); break;
-				case "cpp": case "c++": provider = new CppCodeProvider10(); break;
-				case "js": provider = new JScriptCodeProvider(); break;
-				case "c#":
-				case "csharp":
-				default:
-					provider = new CSharpCodeProvider();
-					break;
-			}
-		}
+        internal void setGeneratedLanguage(LangaugeType lt) {
+            this.generationType = lt;
+        }
 
-		#region properties
-		LanguangeType generationType { get; set; }
-		internal bool useCompileUnit { get; set; }
-		#endregion
+        #endregion
 
-		#region ICodeDomGenerationUtil implementation
-		public CodeGeneratorOptions options { get; private set; }
-		public CodeDomProvider provider { get; private set; }
+        #region properties
+        LangaugeType generationType { get; set; }
+        internal bool useCompileUnit { get; set; }
+        #endregion
 
-		public void createProvider() {
-			if (options == null) {
-				options = new CodeGeneratorOptions();
-				options.BlankLinesBetweenMembers = false;
-				options.ElseOnClosing = true;
-				options.IndentString = "\t";
-			}
-			switch (generationType) {
-				case LanguangeType.VB: this.provider = new VBCodeProvider(); break;
-				case LanguangeType.CPP: this.provider = new CppCodeProvider10(); break;
-				case LanguangeType.JavaScript: this.provider = new JScriptCodeProvider(); break;
-				case LanguangeType.CSharp: this.provider = new CSharpCodeProvider(); break;
-			}
-		}
-		#endregion ICodeDomGenerationUtil implementation
-	}
+        #region ICodeDomGenerationUtil implementation
+        public CodeGeneratorOptions options { get; private set; }
+        public CodeDomProvider provider { get; private set; }
+
+        public void createProvider() {
+            if (options == null) {
+                options = new CodeGeneratorOptions();
+                options.BlankLinesBetweenMembers = false;
+                options.ElseOnClosing = true;
+                options.IndentString = "\t";
+            }
+            switch (generationType) {
+                case LangaugeType.VB: this.provider = new VBCodeProvider(); break;
+                case LangaugeType.CPP: this.provider = new CppCodeProvider10(); break;
+                case LangaugeType.JavaScript: this.provider = new JScriptCodeProvider(); break;
+                case LangaugeType.CSharp: this.provider = new CSharpCodeProvider(); break;
+            }
+        }
+        #endregion ICodeDomGenerationUtil implementation
+    }
 }
